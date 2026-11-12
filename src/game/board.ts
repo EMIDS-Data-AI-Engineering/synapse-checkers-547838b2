@@ -28,3 +28,26 @@ export function boardSquares(): Square[] {
     return { row, column, shade: shadeOf(row, column) }
   })
 }
+
+export interface Position {
+  row: number
+  column: number
+}
+
+const ARROW_STEPS: Record<string, Position> = {
+  ArrowUp: { row: -1, column: 0 },
+  ArrowDown: { row: 1, column: 0 },
+  ArrowLeft: { row: 0, column: -1 },
+  ArrowRight: { row: 0, column: 1 },
+}
+
+function clampToBoard(index: number): number {
+  return Math.min(BOARD_SIZE - 1, Math.max(0, index))
+}
+
+/** Position one arrow-key step from `from`, staying on the board; null for any other key. */
+export function stepFrom(from: Position, key: string): Position | null {
+  const step = ARROW_STEPS[key]
+  if (!step) return null
+  return { row: clampToBoard(from.row + step.row), column: clampToBoard(from.column + step.column) }
+}
