@@ -34,20 +34,21 @@ export interface Position {
   column: number
 }
 
-const ARROW_STEPS: Record<string, Position> = {
-  ArrowUp: { row: -1, column: 0 },
-  ArrowDown: { row: 1, column: 0 },
-  ArrowLeft: { row: 0, column: -1 },
-  ArrowRight: { row: 0, column: 1 },
+export type Direction = 'up' | 'down' | 'left' | 'right'
+
+const DIRECTION_STEPS: Record<Direction, Position> = {
+  up: { row: -1, column: 0 },
+  down: { row: 1, column: 0 },
+  left: { row: 0, column: -1 },
+  right: { row: 0, column: 1 },
 }
 
 function clampToBoard(index: number): number {
   return Math.min(BOARD_SIZE - 1, Math.max(0, index))
 }
 
-/** Position one arrow-key step from `from`, staying on the board; null for any other key. */
-export function stepFrom(from: Position, key: string): Position | null {
-  const step = ARROW_STEPS[key]
-  if (!step) return null
+/** Position one step from `from` in `direction`, staying on the board. */
+export function neighbourOf(from: Position, direction: Direction): Position {
+  const step = DIRECTION_STEPS[direction]
   return { row: clampToBoard(from.row + step.row), column: clampToBoard(from.column + step.column) }
 }

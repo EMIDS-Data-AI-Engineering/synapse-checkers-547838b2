@@ -1,5 +1,5 @@
 import { useRef, useState, type KeyboardEvent } from 'react'
-import { BOARD_SIZE, boardSquares, stepFrom, type Position, type Shade, type Square } from '../game/board'
+import { BOARD_SIZE, boardSquares, neighbourOf, type Direction, type Position, type Shade, type Square } from '../game/board'
 
 const SHADE_CLASS: Record<Shade, string> = {
   dark: 'bg-square-dark',
@@ -13,6 +13,13 @@ function rowsOf(squares: Square[]): Square[][] {
 function squareLabel({ row, column, shade }: Square): string {
   const rowFromBottom = BOARD_SIZE - row
   return `Row ${rowFromBottom}, column ${column + 1}, ${shade} square`
+}
+
+const DIRECTION_BY_KEY: Record<string, Direction> = {
+  ArrowUp: 'up',
+  ArrowDown: 'down',
+  ArrowLeft: 'left',
+  ArrowRight: 'right',
 }
 
 const FIRST_SQUARE: Position = { row: 0, column: 0 }
@@ -36,8 +43,9 @@ export function Board() {
   const [focusStop, setFocusStop] = useState<Position>(FIRST_SQUARE)
 
   function moveFocus(event: KeyboardEvent) {
-    const next = stepFrom(focusStop, event.key)
-    if (!next) return
+    const direction = DIRECTION_BY_KEY[event.key]
+    if (!direction) return
+    const next = neighbourOf(focusStop, direction)
     event.preventDefault()
     setFocusStop(next)
     gridRef.current
