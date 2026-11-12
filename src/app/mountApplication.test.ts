@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { act } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
 function documentWithRoot(): Document {
@@ -22,10 +22,13 @@ describe('mountApplication', () => {
     const mountApplication = await loadMountApplication()
     const page = documentWithRoot()
 
-    mountApplication(page)
+    await act(async () => {
+      mountApplication(page)
+    })
 
-    const heading = await screen.findByRole('heading', { name: 'Checkers' }, { container: page.body })
-    expect(page.getElementById('root')).toContainElement(heading)
+    // A detached document has no window, so Testing Library's queries cannot run against it.
+    const heading = page.querySelector('#root h1')
+    expect(heading?.textContent).toBe('Checkers')
   })
 
   it('throws a descriptive error when the root element is missing', async () => {
