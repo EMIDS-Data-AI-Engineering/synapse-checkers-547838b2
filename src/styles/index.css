@@ -1,3 +1,4 @@
+/* Keep these values equal to src/theme/colors.ts; cssTokens.test.ts enforces it. */
 @import "tailwindcss";
 
 @theme {
