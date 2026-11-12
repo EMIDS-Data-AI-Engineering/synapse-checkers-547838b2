@@ -5,6 +5,8 @@
   --color-ink: #111827;
   --color-paper: #ffffff;
   --color-accent: #1d4ed8;
+  --color-square-light: #f0d9b5;
+  --color-square-dark: #8b5a2b;
 }
 
 body {
