@@ -31,4 +31,13 @@ describe('contrast', () => {
     const { contrastRatio, colors } = await loadTheme()
     expect(contrastRatio(colors.accent, colors.background)).toBeGreaterThanOrEqual(AA_UI_BOUNDARY)
   })
+
+  it('distinguishes dark squares from light squares at the UI boundary ratio', async () => {
+    const { contrastRatio, colors } = await loadTheme()
+    const { squareDark, squareLight } = colors as unknown as Record<string, string | undefined>
+
+    expect(squareDark).toBeDefined()
+    expect(squareLight).toBeDefined()
+    expect(contrastRatio(squareDark!, squareLight!)).toBeGreaterThanOrEqual(AA_UI_BOUNDARY)
+  })
 })
