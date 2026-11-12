@@ -33,11 +33,11 @@ describe('Board', () => {
     const { container } = await renderBoard()
     const shadeAt = (row: number, column: number) => squareAt(container, row, column)?.getAttribute('data-shade')
 
-    for (let row = 0; row < LAST_INDEX; row++) {
-      for (let column = 0; column < LAST_INDEX; column++) {
+    for (let row = 0; row < BOARD_SIZE; row++) {
+      for (let column = 0; column < BOARD_SIZE; column++) {
         expect(['dark', 'light']).toContain(shadeAt(row, column))
-        expect(shadeAt(row, column)).not.toBe(shadeAt(row, column + 1))
-        expect(shadeAt(row, column)).not.toBe(shadeAt(row + 1, column))
+        if (column < LAST_INDEX) expect(shadeAt(row, column)).not.toBe(shadeAt(row, column + 1))
+        if (row < LAST_INDEX) expect(shadeAt(row, column)).not.toBe(shadeAt(row + 1, column))
       }
     }
   })
