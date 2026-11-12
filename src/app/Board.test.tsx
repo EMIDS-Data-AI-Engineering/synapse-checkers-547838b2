@@ -18,6 +18,14 @@ function squareAt(container: HTMLElement, row: number, column: number) {
   return container.querySelector(`[role="gridcell"][data-row="${row}"][data-column="${column}"]`)
 }
 
+function checkersOnBoard(container: HTMLElement, side: 'dark' | 'light') {
+  return Array.from(container.querySelectorAll(`[data-checker="${side}"]`))
+}
+
+function cellOf(checker: Element) {
+  return checker.closest('[role="gridcell"]') as HTMLElement
+}
+
 describe('Board', () => {
   it('renders exactly 64 squares arranged in 8 rows of 8', async () => {
     const { container } = await renderBoard()
@@ -69,6 +77,63 @@ describe('Board', () => {
     const { container } = await renderBoard()
 
     expect(container.querySelector('[role="grid"]')).not.toBeNull()
+    expect(await axe(container)).toHaveNoViolations()
+  })
+
+  it('renders 12 dark checkers on the dark squares of the bottom three rows', async () => {
+    const { container } = await renderBoard()
+    const checkers = checkersOnBoard(container, 'dark')
+
+    expect(checkers).toHaveLength(12)
+    checkers.forEach((checker) => {
+      expect(Number(cellOf(checker).dataset.row)).toBeGreaterThanOrEqual(5)
+      expect(cellOf(checker).dataset.shade).toBe('dark')
+    })
+  })
+
+  it('renders 12 light checkers on the dark squares of the top three rows', async () => {
+    const { container } = await renderBoard()
+    const checkers = checkersOnBoard(container, 'light')
+
+    expect(checkers).toHaveLength(12)
+    checkers.forEach((checker) => {
+      expect(Number(cellOf(checker).dataset.row)).toBeLessThanOrEqual(2)
+      expect(cellOf(checker).dataset.shade).toBe('dark')
+    })
+  })
+
+  it('renders no checker in rows 3 and 4', async () => {
+    const { container } = await renderBoard()
+    const middle = [3, 4].flatMap((row) =>
+      Array.from(container.querySelectorAll(`[role="gridcell"][data-row="${row}"] [data-checker]`)),
+    )
+
+    expect(container.querySelectorAll('[data-checker]')).toHaveLength(24)
+    expect(middle).toEqual([])
+  })
+
+  it("shows each player's bottom-right corner as a light square with no checker", async () => {
+    const { container } = await renderBoard()
+
+    expect(container.querySelectorAll('[data-checker]')).toHaveLength(24)
+    ;[squareAt(container, LAST_INDEX, LAST_INDEX), squareAt(container, 0, 0)].forEach((corner) => {
+      expect(corner?.getAttribute('data-shade')).toBe('light')
+      expect(corner?.querySelector('[data-checker]')).toBeNull()
+    })
+  })
+
+  it("names the checker in the square's accessible label", async () => {
+    const { container } = await renderBoard()
+
+    expect(squareAt(container, 0, 1)?.getAttribute('aria-label')).toMatch(/light checker/)
+    expect(squareAt(container, LAST_INDEX, 0)?.getAttribute('aria-label')).toMatch(/dark checker/)
+    expect(squareAt(container, 3, 0)?.getAttribute('aria-label')).not.toMatch(/checker/)
+  })
+
+  it('has no axe violations with checkers placed', async () => {
+    const { container } = await renderBoard()
+
+    expect(container.querySelectorAll('[data-checker]')).toHaveLength(24)
     expect(await axe(container)).toHaveNoViolations()
   })
 })

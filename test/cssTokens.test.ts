@@ -16,6 +16,8 @@ describe('stylesheet colour tokens', () => {
     ['accent', colors.accent],
     ['square-dark', (colors as Record<string, string>).squareDark],
     ['square-light', (colors as Record<string, string>).squareLight],
+    ['checker-dark', (colors as Record<string, string>).checkerDark],
+    ['checker-light', (colors as Record<string, string>).checkerLight],
   ])('keeps --color-%s equal to the contrast-checked token', (name, expected) => {
     expect(expected).toBeDefined()
     expect(declaredToken(name)).toBe(expected)

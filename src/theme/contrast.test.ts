@@ -40,4 +40,15 @@ describe('contrast', () => {
     expect(squareLight).toBeDefined()
     expect(contrastRatio(squareDark!, squareLight!)).toBeGreaterThanOrEqual(AA_UI_BOUNDARY)
   })
+
+  it('distinguishes each checker colour from the dark square at the UI boundary ratio', async () => {
+    const { contrastRatio, colors } = await loadTheme()
+    const { checkerDark, checkerLight, squareDark } = colors as unknown as Record<string, string | undefined>
+
+    expect(checkerDark).toBeDefined()
+    expect(checkerLight).toBeDefined()
+    expect(contrastRatio(checkerDark!, squareDark!)).toBeGreaterThanOrEqual(AA_UI_BOUNDARY)
+    expect(contrastRatio(checkerLight!, squareDark!)).toBeGreaterThanOrEqual(AA_UI_BOUNDARY)
+    expect(contrastRatio(checkerDark!, checkerLight!)).toBeGreaterThanOrEqual(AA_UI_BOUNDARY)
+  })
 })

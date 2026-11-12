@@ -41,6 +41,19 @@ describe('Board keyboard navigation', () => {
     expect(document.activeElement).toBe(start)
   })
 
+  it('moves focus onto a square holding a checker without making the checker a tab stop', () => {
+    const { container } = render(<Board />)
+    const start = cellAt(container, 0, 0)
+    start.focus()
+
+    fireEvent.keyDown(start, { key: 'ArrowDown' })
+    const target = cellAt(container, 1, 0)
+    expect(target.querySelector('[data-checker]')).not.toBeNull()
+    expect(document.activeElement).toBe(target)
+    expect(container.querySelectorAll('[data-checker][tabindex]')).toHaveLength(0)
+    expect(container.querySelectorAll('[tabindex="0"]')).toHaveLength(1)
+  })
+
   it('ignores keys that are not arrows', () => {
     const { container } = render(<Board />)
     const start = cellAt(container, 0, 0)
