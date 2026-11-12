@@ -1,4 +1,5 @@
 import { useRef, useState, type KeyboardEvent } from 'react'
+import { checkerAt, startingCheckers, type Checker, type Side } from '../game/pieces'
 import { BOARD_SIZE, boardSquares, neighbourOf, type Direction, type Position, type Shade, type Square } from '../game/board'
 
 const SHADE_CLASS: Record<Shade, string> = {
@@ -10,9 +11,15 @@ function rowsOf(squares: Square[]): Square[][] {
   return Array.from({ length: BOARD_SIZE }, (_, row) => squares.filter((square) => square.row === row))
 }
 
-function squareLabel({ row, column, shade }: Square): string {
+const CHECKER_CLASS: Record<Side, string> = {
+  dark: 'bg-checker-dark',
+  light: 'bg-checker-light',
+}
+
+function squareLabel({ row, column, shade }: Square, checker?: Checker): string {
   const rowFromBottom = BOARD_SIZE - row
-  return `Row ${rowFromBottom}, column ${column + 1}, ${shade} square`
+  const occupant = checker ? `, ${checker.side} checker` : ''
+  return `Row ${rowFromBottom}, column ${column + 1}, ${shade} square${occupant}`
 }
 
 const DIRECTION_BY_KEY: Record<string, Direction> = {
@@ -24,22 +31,35 @@ const DIRECTION_BY_KEY: Record<string, Direction> = {
 
 const FIRST_SQUARE: Position = { row: 0, column: 0 }
 
-function BoardSquare({ square, isFocusStop }: { square: Square; isFocusStop: boolean }) {
+function CheckerDisc({ side }: { side: Side }) {
+  return (
+    <span
+      aria-hidden="true"
+      data-checker={side}
+      className={`h-4/5 w-4/5 rounded-full border-2 border-square-light ${CHECKER_CLASS[side]}`}
+    />
+  )
+}
+
+function BoardSquare({ square, checker, isFocusStop }: { square: Square; checker?: Checker; isFocusStop: boolean }) {
   return (
     <div
       role="gridcell"
       tabIndex={isFocusStop ? 0 : -1}
-      aria-label={squareLabel(square)}
+      aria-label={squareLabel(square, checker)}
       data-row={square.row}
       data-column={square.column}
       data-shade={square.shade}
-      className={`flex-1 ${SHADE_CLASS[square.shade]}`}
-    />
+      className={`flex flex-1 items-center justify-center ${SHADE_CLASS[square.shade]}`}
+    >
+      {checker && <CheckerDisc side={checker.side} />}
+    </div>
   )
 }
 
 export function Board() {
   const gridRef = useRef<HTMLDivElement>(null)
+  const [checkers] = useState(startingCheckers)
   const [focusStop, setFocusStop] = useState<Position>(FIRST_SQUARE)
 
   function moveFocus(event: KeyboardEvent) {
@@ -67,6 +87,7 @@ export function Board() {
             <BoardSquare
               key={square.column}
               square={square}
+              checker={checkerAt(checkers, square)}
               isFocusStop={square.row === focusStop.row && square.column === focusStop.column}
             />
           ))}
