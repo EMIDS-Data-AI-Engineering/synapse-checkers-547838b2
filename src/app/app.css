@@ -1,0 +1,43 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100dvh;
+  color: var(--color-text);
+  background: var(--color-background);
+}
+
+.app__header,
+.app__main {
+  width: 100%;
+  max-width: var(--space-content-max-width);
+  margin: 0 auto;
+  padding: var(--space-medium);
+}
+
+.app__main {
+  flex: 1;
+}
+
+.app__game {
+  min-height: 12rem;
+  overflow: auto;
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
