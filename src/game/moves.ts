@@ -1,4 +1,4 @@
-import { BOARD_SIZE, shadeOf, type Position } from './board'
+import { BOARD_SIZE, boardSquares, shadeOf, type Position } from './board'
 import { checkerAt, type Checker, type Side } from './pieces'
 
 /** Row 0 is the top of the board, so dark checkers advance toward smaller row numbers. */
@@ -31,4 +31,10 @@ export function moveChecker(checkers: Checker[], from: Position, to: Position): 
     throw new RangeError(`Illegal move from ${from.row},${from.column} to ${to.row},${to.column}`)
   }
   return checkers.map((checker) => (checkerAt([checker], from) ? { ...checker, row: to.row, column: to.column } : checker))
+}
+
+export function legalDestinationsFor(checkers: Checker[], from: Position): Position[] {
+  return boardSquares()
+    .filter((square) => isLegalStep(checkers, from, square))
+    .map(({ row, column }) => ({ row, column }))
 }
