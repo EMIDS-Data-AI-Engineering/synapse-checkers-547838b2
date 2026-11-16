@@ -45,3 +45,16 @@ describe('turn', () => {
     expect(match).toEqual({ checkers: [darkAt(ORIGIN.row, ORIGIN.column)], sideToMove: 'dark' })
   })
 })
+
+describe('playStep jump', () => {
+  it('removes the captured checker and passes the turn after a jump', async () => {
+    const { playStep } = await loadTurn()
+    const captured: Checker = { row: 3, column: 2, side: 'light' }
+    const match = { checkers: [darkAt(ORIGIN.row, ORIGIN.column), captured], sideToMove: 'dark' as const }
+
+    const next = playStep(match, ORIGIN, { row: 2, column: 1 })
+
+    expect(next.checkers).toEqual([darkAt(2, 1)])
+    expect(next.sideToMove).toBe('light')
+  })
+})

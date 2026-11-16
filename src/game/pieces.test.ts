@@ -83,3 +83,20 @@ describe('checkerAt', () => {
     expect(checkerAt(startingCheckers(), { row: 7, column: 0 })).toMatchObject({ side: 'dark', row: 7, column: 0 })
   })
 })
+
+describe('liveCountOf', () => {
+  it('counts the checkers of one side', async () => {
+    const { liveCountOf, startingCheckers } = await loadPieces()
+    const mixed = [
+      { row: 5, column: 2, side: 'dark' as const },
+      { row: 4, column: 3, side: 'light' as const },
+      { row: 0, column: 1, side: 'light' as const },
+    ]
+
+    expect(liveCountOf(startingCheckers(), 'dark')).toBe(CHECKERS_PER_SIDE)
+    expect(liveCountOf(startingCheckers(), 'light')).toBe(CHECKERS_PER_SIDE)
+    expect(liveCountOf(mixed, 'dark')).toBe(1)
+    expect(liveCountOf(mixed, 'light')).toBe(2)
+    expect(liveCountOf([], 'dark')).toBe(0)
+  })
+})

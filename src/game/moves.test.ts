@@ -117,3 +117,84 @@ describe('moves', () => {
     expect(legalDestinationsFor(checkers, ORIGIN)).toEqual(expected.map(({ row, column }) => ({ row, column })))
   })
 })
+
+describe('isLegalJump', () => {
+  const LANDING = { row: 3, column: 4 }
+  const dark = darkAt(ORIGIN.row, ORIGIN.column)
+
+  it('accepts a forward jump over an adjacent opponent onto an empty dark square', async () => {
+    const { isLegalJump } = await loadMoves()
+
+    expect(isLegalJump([dark, lightAt(4, 3)], ORIGIN, LANDING)).toBe(true)
+  })
+
+  it('refuses a jump over an empty square', async () => {
+    const { isLegalJump } = await loadMoves()
+
+    expect(isLegalJump([dark], ORIGIN, LANDING)).toBe(false)
+  })
+
+  it('refuses a jump over the mover\'s own checker', async () => {
+    const { isLegalJump } = await loadMoves()
+
+    expect(isLegalJump([dark, darkAt(4, 3)], ORIGIN, LANDING)).toBe(false)
+  })
+
+  it('refuses a jump onto an occupied square', async () => {
+    const { isLegalJump } = await loadMoves()
+
+    expect(isLegalJump([dark, lightAt(4, 3), lightAt(3, 4)], ORIGIN, LANDING)).toBe(false)
+  })
+
+  it('refuses a jump that would land off the board', async () => {
+    const { isLegalJump } = await loadMoves()
+    const edgeMover = darkAt(2, 1)
+
+    expect(isLegalJump([edgeMover, lightAt(1, 0)], { row: 2, column: 1 }, { row: 0, column: -1 })).toBe(false)
+  })
+
+  it('refuses a backward jump by a regular checker', async () => {
+    const { isLegalJump } = await loadMoves()
+
+    expect(isLegalJump([dark, lightAt(6, 3)], ORIGIN, { row: 7, column: 4 })).toBe(false)
+  })
+
+  it('refuses a jump from a square holding no checker', async () => {
+    const { isLegalJump } = await loadMoves()
+
+    expect(isLegalJump([lightAt(4, 3)], ORIGIN, LANDING)).toBe(false)
+  })
+})
+
+describe('isLegalMove', () => {
+  it('accepts both a step and a jump and refuses anything else', async () => {
+    const { isLegalMove } = await loadMoves()
+    const checkers = [darkAt(ORIGIN.row, ORIGIN.column), lightAt(4, 3)]
+
+    expect(isLegalMove(checkers, ORIGIN, { row: 4, column: 1 })).toBe(true)
+    expect(isLegalMove(checkers, ORIGIN, { row: 3, column: 4 })).toBe(true)
+    expect(isLegalMove(checkers, ORIGIN, { row: 4, column: 3 })).toBe(false)
+  })
+})
+
+describe('moveChecker', () => {
+  it('removes the jumped checker and relocates the mover on a jump', async () => {
+    const { moveChecker } = await loadMoves()
+    const bystander = lightAt(0, 1)
+    const checkers = [darkAt(ORIGIN.row, ORIGIN.column), lightAt(4, 3), bystander]
+
+    const next = moveChecker(checkers, ORIGIN, { row: 3, column: 4 })
+
+    expect(next).toHaveLength(2)
+    expect(next).toContainEqual(darkAt(3, 4))
+    expect(next).toContainEqual(bystander)
+    expect(next).not.toContainEqual(lightAt(4, 3))
+  })
+
+  it('legalDestinationsFor includes the landing square of a jump', async () => {
+    const { legalDestinationsFor } = await loadMoves()
+    const checkers = [darkAt(ORIGIN.row, ORIGIN.column), lightAt(4, 3)]
+
+    expect(legalDestinationsFor(checkers, ORIGIN)).toContainEqual({ row: 3, column: 4 })
+  })
+})
