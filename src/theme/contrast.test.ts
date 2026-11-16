@@ -51,4 +51,9 @@ describe('contrast', () => {
     expect(contrastRatio(checkerLight!, squareDark!)).toBeGreaterThanOrEqual(AA_UI_BOUNDARY)
     expect(contrastRatio(checkerDark!, checkerLight!)).toBeGreaterThanOrEqual(AA_UI_BOUNDARY)
   })
+
+  it('meets WCAG AA for the Start Game label on the accent button', async () => {
+    const { contrastRatio, colors } = await loadTheme()
+    expect(contrastRatio(colors.background, colors.accent)).toBeGreaterThanOrEqual(AA_NORMAL_TEXT)
+  })
 })

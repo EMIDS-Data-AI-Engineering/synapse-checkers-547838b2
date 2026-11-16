@@ -1,4 +1,4 @@
-import { Board } from './Board'
+import { GameScreen } from './GameScreen'
 
 export function AppShell() {
   return (
@@ -7,7 +7,7 @@ export function AppShell() {
         <h1 className="mx-auto w-full max-w-5xl text-2xl font-bold sm:text-3xl">Checkers</h1>
       </header>
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
-        <Board />
+        <GameScreen />
       </main>
     </div>
   )

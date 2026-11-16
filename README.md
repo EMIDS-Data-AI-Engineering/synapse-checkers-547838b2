@@ -37,3 +37,7 @@ Checked live in headless Chromium (Playwright) against `npm run build` + `npm ru
 | 375x500 | 24 / 24 | 24 / 24 | 34px | 375 / 375 |
 
 At 375x500 the full-page screenshot shows the heading and the whole board with 12 light checkers on the top three rows and 12 dark checkers on the bottom three, and nothing is clipped (document height 500 equals the viewport height, so no content is cut off). The middle two rows are empty and the bottom-right squares at (7,7) and (0,0) are light and empty.
+
+### Game Start overlay
+
+The overlay sits in the same grid cell as the board, so the populated board is rendered beneath it from the first frame. Start fades the overlay out over `REVEAL_DURATION_MS` (200 ms, under one second) and then removes it. Unit tests cover the timing and that the board stays mounted throughout. The live-browser check at 1440, 768, 375 and 375x500 has not been done yet.
