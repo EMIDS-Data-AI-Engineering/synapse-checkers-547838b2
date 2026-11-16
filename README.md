@@ -64,6 +64,10 @@ Checked live in headless Chromium (Playwright) against `npm run build` + `npm ru
 | 375x812 | yes | yes | yes | none | none | 375 / 375 |
 | 375x500 | yes | yes | yes | none | none | 375 / 375 |
 
+### Grab zone
+
+The whole square is the grab target, not just the round checker: the press handler lives on the board square, so a press anywhere in a movable dark checker's square, corners and edges included, starts the drag on the first attempt. Squares partition the board, so a zone never overlaps a neighbour. This is covered by the `hit zone` tests in `src/app/BoardDrag.test.tsx`. A live multi-viewport browser pass and a human first-press trial (AC2's 95%) have not been run yet.
+
 Known gap, to be raised as a follow-up story: WCAG 2.2 SC 2.5.7 (Dragging Movements) asks for a single-pointer alternative, and keyboard users cannot move a piece. The mockup's click-a-piece-then-click-a-highlighted-square interaction, with legal-move highlighting, would close it. No criterion of this story requires it.
 
 ## Turn rule
