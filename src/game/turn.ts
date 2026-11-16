@@ -18,7 +18,7 @@ export function isPlayersTurn({ sideToMove }: MatchState): boolean {
   return sideToMove === PLAYER_SIDE
 }
 
-/** Moves the mover's checker a legal step and passes the turn; throws RangeError on an illegal step or another side's checker. */
+/** Moves the mover's checker a legal step or jump and passes the turn; throws RangeError on an illegal move or another side's checker. */
 export function playStep(match: MatchState, from: Position, to: Position): MatchState {
   const mover = checkerAt(match.checkers, from)
   if (mover && !isMovableBy(mover, match.sideToMove)) {

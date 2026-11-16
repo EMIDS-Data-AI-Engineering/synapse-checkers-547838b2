@@ -33,3 +33,7 @@ export function startingCheckers(): Checker[] {
 export function checkerAt(checkers: Checker[], position: Position): Checker | undefined {
   return checkers.find((checker) => checker.row === position.row && checker.column === position.column)
 }
+
+export function liveCountOf(checkers: Checker[], side: Side): number {
+  return checkers.filter((checker) => checker.side === side).length
+}

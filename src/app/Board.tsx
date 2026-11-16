@@ -3,6 +3,7 @@ import { checkerAt, type Checker, type Side } from '../game/pieces'
 import { PLAYER_SIDE } from '../game/matchUp'
 import { isMovableBy, legalDestinationsFor } from '../game/moves'
 import { isPlayersTurn, playStep, startingMatch, type MatchState } from '../game/turn'
+import { PieceCount } from './PieceCount'
 import { TurnIndicator } from './TurnIndicator'
 import { useCheckerDrag, type DragState } from './useCheckerDrag'
 import { BOARD_SIZE, boardSquares, neighbourOf, type Direction, type Position, type Shade, type Square } from '../game/board'
@@ -133,6 +134,7 @@ export function Board({ canMove = false, initialMatch }: BoardProps) {
 
   return (
     <>
+    <PieceCount checkers={checkers} />
     <div
       ref={gridRef}
       onKeyDown={moveFocus}
