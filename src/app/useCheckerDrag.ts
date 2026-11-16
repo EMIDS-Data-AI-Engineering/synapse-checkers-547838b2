@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import type { Position } from '../game/board'
-import { FIRST_TO_MOVE, isLegalStep, isMovableBy } from '../game/moves'
+import { PLAYER_SIDE } from '../game/matchUp'
+import { isLegalStep, isMovableBy } from '../game/moves'
 import { checkerAt, type Checker } from '../game/pieces'
 import { pointToSquare, type ClientPoint } from './pointToSquare'
 
@@ -26,7 +27,7 @@ export function useCheckerDrag({ checkers, canMove, getBoardRect, onMove }: Drag
   const startDrag = useCallback(
     (origin: Position, event: ReactPointerEvent) => {
       const checker = checkerAt(checkers, origin)
-      if (!canMove || !checker || !isMovableBy(checker, FIRST_TO_MOVE)) return
+      if (!canMove || !checker || !isMovableBy(checker, PLAYER_SIDE)) return
       setDrag({ origin, grabPoint: pointOf(event), offset: NO_OFFSET })
     },
     [checkers, canMove],

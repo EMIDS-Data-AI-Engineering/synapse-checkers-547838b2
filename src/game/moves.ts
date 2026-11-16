@@ -1,9 +1,6 @@
 import { BOARD_SIZE, shadeOf, type Position } from './board'
 import { checkerAt, type Checker, type Side } from './pieces'
 
-/** The side whose turn it is until a computer opponent introduces alternation. */
-export const FIRST_TO_MOVE: Side = 'dark'
-
 /** Row 0 is the top of the board, so dark checkers advance toward smaller row numbers. */
 const FORWARD_ROW_STEP: Record<Side, number> = { dark: -1, light: 1 }
 const STEP_DISTANCE = 1
