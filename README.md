@@ -50,3 +50,9 @@ The overlay sits in the same grid cell as the board, so the populated board is r
 | 375x500 | yes | yes | 24 / 24 | ~256 ms | gridcell | 375 / 375 |
 
 The fade's class names, its `transitionDuration` (taken from `REVEAL_DURATION_MS`) and the reduced-motion rule are asserted in `GameStartOverlay.fade.test.tsx`.
+
+## Drag
+
+Dark checkers can be dragged with the pointer once the game is in the `playing` phase. A drop on an empty dark square one step diagonally forward snaps the checker there; any other drop, or a cancelled pointer, returns it to its origin. Jumps, kings and keyboard moves are not part of this story.
+
+Live headless-Chromium verification at 1440x900, 768x1024, 375x812 and 375x500 has **not** been run for this change; the behaviour is covered by the happy-dom tests only (`src/app/BoardDrag.test.tsx`).

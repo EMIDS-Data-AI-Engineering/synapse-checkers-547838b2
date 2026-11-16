@@ -1,5 +1,7 @@
-import { useRef, useState, type KeyboardEvent } from 'react'
+import { useCallback, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react'
 import { checkerAt, startingCheckers, type Checker, type Side } from '../game/pieces'
+import { FIRST_TO_MOVE, isMovableBy, moveChecker } from '../game/moves'
+import { useCheckerDrag, type DragState } from './useCheckerDrag'
 import { BOARD_SIZE, boardSquares, neighbourOf, type Direction, type Position, type Shade, type Square } from '../game/board'
 
 const SHADE_CLASS: Record<Shade, string> = {
@@ -31,17 +33,41 @@ const DIRECTION_BY_KEY: Record<string, Direction> = {
 
 const FIRST_SQUARE: Position = { row: 0, column: 0 }
 
-function CheckerDisc({ side }: { side: Side }) {
+interface CheckerDiscProps {
+  side: Side
+  isMovable: boolean
+  dragOffset?: DragState['offset']
+  onPointerDown: (event: PointerEvent) => void
+}
+
+function discClasses(side: Side, isMovable: boolean, isDragging: boolean): string {
+  const cursor = isDragging ? 'cursor-grabbing pointer-events-none relative z-10' : isMovable ? 'cursor-grab touch-none' : ''
+  return `h-4/5 w-4/5 rounded-full border-2 border-square-light ${CHECKER_CLASS[side]} ${cursor}`
+}
+
+function CheckerDisc({ side, isMovable, dragOffset, onPointerDown }: CheckerDiscProps) {
   return (
     <span
       aria-hidden="true"
       data-checker={side}
-      className={`h-4/5 w-4/5 rounded-full border-2 border-square-light ${CHECKER_CLASS[side]}`}
+      data-dragging={dragOffset ? 'true' : undefined}
+      style={dragOffset ? { transform: `translate(${dragOffset.x}px, ${dragOffset.y}px)` } : undefined}
+      className={discClasses(side, isMovable, Boolean(dragOffset))}
+      onPointerDown={onPointerDown}
     />
   )
 }
 
-function BoardSquare({ square, checker, isFocusStop }: { square: Square; checker?: Checker; isFocusStop: boolean }) {
+interface BoardSquareProps {
+  square: Square
+  checker?: Checker
+  isFocusStop: boolean
+  canMove: boolean
+  dragOffset?: DragState['offset']
+  onGrab: (origin: Position, event: PointerEvent) => void
+}
+
+function BoardSquare({ square, checker, isFocusStop, canMove, dragOffset, onGrab }: BoardSquareProps) {
   return (
     <div
       role="gridcell"
@@ -52,14 +78,27 @@ function BoardSquare({ square, checker, isFocusStop }: { square: Square; checker
       data-shade={square.shade}
       className={`flex flex-1 items-center justify-center ${SHADE_CLASS[square.shade]}`}
     >
-      {checker && <CheckerDisc side={checker.side} />}
+      {checker && (
+        <CheckerDisc
+          side={checker.side}
+          isMovable={canMove && isMovableBy(checker, FIRST_TO_MOVE)}
+          dragOffset={dragOffset}
+          onPointerDown={(event) => onGrab(square, event)}
+        />
+      )}
     </div>
   )
 }
 
-export function Board() {
+export function Board({ canMove = false }: { canMove?: boolean }) {
   const gridRef = useRef<HTMLDivElement>(null)
-  const [checkers] = useState(startingCheckers)
+  const [checkers, setCheckers] = useState(startingCheckers)
+  const getBoardRect = useCallback(() => gridRef.current?.getBoundingClientRect(), [])
+  const applyMove = useCallback(
+    (from: Position, to: Position) => setCheckers((current) => moveChecker(current, from, to)),
+    [],
+  )
+  const { drag, startDrag } = useCheckerDrag({ checkers, canMove, getBoardRect, onMove: applyMove })
   const [focusStop, setFocusStop] = useState<Position>(FIRST_SQUARE)
 
   function moveFocus(event: KeyboardEvent) {
@@ -89,6 +128,9 @@ export function Board() {
               square={square}
               checker={checkerAt(checkers, square)}
               isFocusStop={square.row === focusStop.row && square.column === focusStop.column}
+              canMove={canMove}
+              dragOffset={drag?.origin.row === square.row && drag.origin.column === square.column ? drag.offset : undefined}
+              onGrab={startDrag}
             />
           ))}
         </div>

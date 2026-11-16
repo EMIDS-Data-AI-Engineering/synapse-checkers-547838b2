@@ -22,7 +22,7 @@ export function GameScreen() {
   return (
     <div className="grid">
       <div ref={boardRef} className="col-start-1 row-start-1">
-        <Board />
+        <Board canMove={phase === 'playing'} />
       </div>
       {phase !== 'playing' && (
         <GameStartOverlay onStart={start} isLeaving={isStarted} fadeDurationMs={REVEAL_DURATION_MS} />
