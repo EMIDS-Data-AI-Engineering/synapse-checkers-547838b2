@@ -88,3 +88,18 @@ Checked live in headless Chromium (Playwright) against `npm run build` + `npm ru
 | 375x500 | 441 / 481 | 375 / 375 | 505 |
 
 At 375x500 the document is 5 px taller than the viewport, so it scrolls vertically and the bar is reachable; nothing is clipped.
+
+## Legal-move highlighting
+
+Picking up a checker highlights every square it can legally move to (green inset ring, announced as "legal move" in the square's label). Highlights disappear as soon as the drag ends or is cancelled; a checker with no legal moves highlights nothing and returns to its origin.
+
+Checked live in headless Chromium (Playwright) against `npm run build` + `npm run preview`, after pressing Start Game and holding the pointer on the dark checker at row 5, column 2:
+
+| Viewport | Highlighted squares | Square size (px) | Computed ring | Highlighted after release |
+| --- | --- | --- | --- | --- |
+| 1440x900 | 2 | 72 | 4px inset `rgb(126, 207, 142)` | 0 |
+| 768x1024 | 2 | 72 | 4px inset `rgb(126, 207, 142)` | 0 |
+| 375x812 | 2 | 42 | 4px inset `rgb(126, 207, 142)` | 0 |
+| 375x500 | 2 | 42 | 4px inset `rgb(126, 207, 142)` | 0 |
+
+A screenshot at 375x500 shows the ring clearly visible and distinct on the 42 px dark squares.

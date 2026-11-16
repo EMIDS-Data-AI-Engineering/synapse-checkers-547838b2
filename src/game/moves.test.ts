@@ -78,4 +78,42 @@ describe('moves', () => {
 
     expect(() => moveChecker([darkAt(5, 2)], ORIGIN, { row: 6, column: 3 })).toThrow(RangeError)
   })
+
+  it('legalDestinationsFor lists both forward diagonal empty dark squares', async () => {
+    const { legalDestinationsFor } = await loadMoves()
+
+    const destinations = legalDestinationsFor([darkAt(5, 2)], ORIGIN)
+
+    expect(destinations).toHaveLength(2)
+    expect(destinations).toEqual(expect.arrayContaining([{ row: 4, column: 1 }, { row: 4, column: 3 }]))
+  })
+
+  it('legalDestinationsFor lists only the on-board square from an edge column', async () => {
+    const { legalDestinationsFor } = await loadMoves()
+
+    expect(legalDestinationsFor([darkAt(5, 0)], { row: 5, column: 0 })).toEqual([{ row: 4, column: 1 }])
+  })
+
+  it('legalDestinationsFor returns no squares for a checker whose forward squares are occupied', async () => {
+    const { legalDestinationsFor } = await loadMoves()
+    const checkers = [darkAt(5, 2), darkAt(4, 1), lightAt(4, 3)]
+
+    expect(legalDestinationsFor(checkers, ORIGIN)).toEqual([])
+  })
+
+  it('legalDestinationsFor returns no squares for an empty origin', async () => {
+    const { legalDestinationsFor } = await loadMoves()
+
+    expect(legalDestinationsFor([darkAt(5, 2)], { row: 3, column: 0 })).toEqual([])
+  })
+
+  it('legalDestinationsFor agrees with isLegalStep for every square', async () => {
+    const { legalDestinationsFor, isLegalStep } = await loadMoves()
+    const { boardSquares } = await import('./board')
+    const checkers = [darkAt(5, 2), lightAt(4, 3)]
+
+    const expected = boardSquares().filter((square) => isLegalStep(checkers, ORIGIN, square))
+
+    expect(legalDestinationsFor(checkers, ORIGIN)).toEqual(expected.map(({ row, column }) => ({ row, column })))
+  })
 })

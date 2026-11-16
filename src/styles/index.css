@@ -9,6 +9,7 @@
   --color-square-dark: #8b5a2b;
   --color-checker-dark: #000000;
   --color-checker-light: #e8dcc8;
+  --color-legal-move: #7ecf8e;
 }
 
 /* inline: the duration variable is set on the settling disc, so it must resolve there, not on :root. */
