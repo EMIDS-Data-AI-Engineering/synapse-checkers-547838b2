@@ -6,4 +6,5 @@ export const colors = {
   squareDark: '#8b5a2b',
   checkerDark: '#000000',
   checkerLight: '#e8dcc8',
+  legalMove: '#7ecf8e',
 } as const

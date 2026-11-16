@@ -84,3 +84,7 @@ Checked live in headless Chromium (Playwright) against `npm run build` + `npm ru
 | 375x500 | 441 / 481 | 375 / 375 | 505 |
 
 At 375x500 the document is 5 px taller than the viewport, so it scrolls vertically and the bar is reachable; nothing is clipped.
+
+## Legal-move highlighting
+
+Picking up a checker highlights every square it can legally move to (green inset ring, announced as "legal move" in the square's label). Highlights disappear as soon as the drag ends or is cancelled; a checker with no legal moves highlights nothing and returns to its origin.

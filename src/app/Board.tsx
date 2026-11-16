@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react'
 import { checkerAt, type Checker, type Side } from '../game/pieces'
 import { PLAYER_SIDE } from '../game/matchUp'
-import { isMovableBy } from '../game/moves'
+import { isMovableBy, legalDestinationsFor } from '../game/moves'
 import { isPlayersTurn, playStep, startingMatch, type MatchState } from '../game/turn'
 import { TurnIndicator } from './TurnIndicator'
 import { useCheckerDrag, type DragState } from './useCheckerDrag'
@@ -21,10 +21,20 @@ const CHECKER_CLASS: Record<Side, string> = {
   light: 'bg-checker-light',
 }
 
-function squareLabel({ row, column, shade }: Square, checker?: Checker): string {
+const DESTINATION_CLASS: Record<'true' | 'false', string> = {
+  true: 'ring-4 ring-inset ring-legal-move',
+  false: '',
+}
+
+function squareLabel({ row, column, shade }: Square, checker?: Checker, isLegalDestination = false): string {
   const rowFromBottom = BOARD_SIZE - row
   const occupant = checker ? `, ${checker.side} checker` : ''
-  return `Row ${rowFromBottom}, column ${column + 1}, ${shade} square${occupant}`
+  const destination = isLegalDestination ? ', legal move' : ''
+  return `Row ${rowFromBottom}, column ${column + 1}, ${shade} square${occupant}${destination}`
+}
+
+function isSamePosition(first: Position, second: Position): boolean {
+  return first.row === second.row && first.column === second.column
 }
 
 const DIRECTION_BY_KEY: Record<string, Direction> = {
@@ -66,20 +76,22 @@ interface BoardSquareProps {
   checker?: Checker
   isFocusStop: boolean
   canMove: boolean
+  isLegalDestination: boolean
   dragOffset?: DragState['offset']
   onGrab: (origin: Position, event: PointerEvent) => void
 }
 
-function BoardSquare({ square, checker, isFocusStop, canMove, dragOffset, onGrab }: BoardSquareProps) {
+function BoardSquare({ square, checker, isFocusStop, canMove, isLegalDestination, dragOffset, onGrab }: BoardSquareProps) {
   return (
     <div
       role="gridcell"
       tabIndex={isFocusStop ? 0 : -1}
-      aria-label={squareLabel(square, checker)}
+      aria-label={squareLabel(square, checker, isLegalDestination)}
       data-row={square.row}
       data-column={square.column}
       data-shade={square.shade}
-      className={`flex flex-1 items-center justify-center ${SHADE_CLASS[square.shade]}`}
+      data-legal-destination={isLegalDestination ? 'true' : undefined}
+      className={`flex flex-1 items-center justify-center ${SHADE_CLASS[square.shade]} ${DESTINATION_CLASS[`${isLegalDestination}`]}`}
     >
       {checker && (
         <CheckerDisc
@@ -108,6 +120,7 @@ export function Board({ canMove = false, initialMatch }: BoardProps) {
     [],
   )
   const { drag, startDrag } = useCheckerDrag({ checkers, canMove: canMove && isPlayersTurn(match), getBoardRect, onMove: applyMove })
+  const legalDestinations = drag ? legalDestinationsFor(checkers, drag.origin) : []
   const [focusStop, setFocusStop] = useState<Position>(FIRST_SQUARE)
 
   function moveFocus(event: KeyboardEvent) {
@@ -139,6 +152,7 @@ export function Board({ canMove = false, initialMatch }: BoardProps) {
               checker={checkerAt(checkers, square)}
               isFocusStop={square.row === focusStop.row && square.column === focusStop.column}
               canMove={canMove && isPlayersTurn(match)}
+              isLegalDestination={legalDestinations.some((destination) => isSamePosition(destination, square))}
               dragOffset={drag?.origin.row === square.row && drag.origin.column === square.column ? drag.offset : undefined}
               onGrab={startDrag}
             />
