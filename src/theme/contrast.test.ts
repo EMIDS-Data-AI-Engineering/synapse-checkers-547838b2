@@ -56,4 +56,12 @@ describe('contrast', () => {
     const { contrastRatio, colors } = await loadTheme()
     expect(contrastRatio(colors.background, colors.accent)).toBeGreaterThanOrEqual(AA_NORMAL_TEXT)
   })
+
+  it('distinguishes the legal-move highlight from the dark square at the UI boundary ratio', async () => {
+    const { contrastRatio, colors } = await loadTheme()
+    const { legalMove, squareDark } = colors as unknown as Record<string, string | undefined>
+
+    expect(legalMove).toBeDefined()
+    expect(contrastRatio(legalMove!, squareDark!)).toBeGreaterThanOrEqual(AA_UI_BOUNDARY)
+  })
 })

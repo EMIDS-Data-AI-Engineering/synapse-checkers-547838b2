@@ -18,6 +18,7 @@ describe('stylesheet colour tokens', () => {
     ['square-light', (colors as Record<string, string>).squareLight],
     ['checker-dark', (colors as Record<string, string>).checkerDark],
     ['checker-light', (colors as Record<string, string>).checkerLight],
+    ['legal-move', (colors as Record<string, string>).legalMove],
   ])('keeps --color-%s equal to the contrast-checked token', (name, expected) => {
     expect(expected).toBeDefined()
     expect(declaredToken(name)).toBe(expected)
