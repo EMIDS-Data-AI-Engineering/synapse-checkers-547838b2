@@ -48,25 +48,27 @@ const FIRST_SQUARE: Position = { row: 0, column: 0 }
 
 interface CheckerDiscProps {
   side: Side
-  isMovable: boolean
   dragOffset?: DragState['offset']
-  onPointerDown: (event: PointerEvent) => void
 }
 
-function discClasses(side: Side, isMovable: boolean, isDragging: boolean): string {
-  const cursor = isDragging ? 'cursor-grabbing pointer-events-none relative z-10 touch-none' : isMovable ? 'cursor-grab touch-none' : ''
+function squareClasses(shade: Shade, isMovable: boolean): string {
+  const grabCue = isMovable ? 'cursor-grab touch-none' : ''
+  return `flex flex-1 items-center justify-center ${SHADE_CLASS[shade]} ${grabCue}`.trim()
+}
+
+function discClasses(side: Side, isDragging: boolean): string {
+  const cursor = isDragging ? 'cursor-grabbing pointer-events-none relative z-10 touch-none' : ''
   return `h-4/5 w-4/5 rounded-full border-2 border-square-light ${CHECKER_CLASS[side]} ${cursor}`
 }
 
-function CheckerDisc({ side, isMovable, dragOffset, onPointerDown }: CheckerDiscProps) {
+function CheckerDisc({ side, dragOffset }: CheckerDiscProps) {
   return (
     <span
       aria-hidden="true"
       data-checker={side}
       data-dragging={dragOffset ? 'true' : undefined}
       style={dragOffset ? { transform: `translate(${dragOffset.x}px, ${dragOffset.y}px)` } : undefined}
-      className={discClasses(side, isMovable, Boolean(dragOffset))}
-      onPointerDown={onPointerDown}
+      className={discClasses(side, Boolean(dragOffset))}
     />
   )
 }
@@ -82,6 +84,7 @@ interface BoardSquareProps {
 }
 
 function BoardSquare({ square, checker, isFocusStop, canMove, isLegalDestination, dragOffset, onGrab }: BoardSquareProps) {
+  const isMovable = Boolean(checker) && canMove && isMovableBy(checker!, PLAYER_SIDE)
   return (
     <div
       role="gridcell"
@@ -91,16 +94,10 @@ function BoardSquare({ square, checker, isFocusStop, canMove, isLegalDestination
       data-column={square.column}
       data-shade={square.shade}
       data-legal-destination={isLegalDestination ? 'true' : undefined}
-      className={`flex flex-1 items-center justify-center ${SHADE_CLASS[square.shade]} ${DESTINATION_CLASS[`${isLegalDestination}`]}`}
+      className={`${squareClasses(square.shade, isMovable)} ${DESTINATION_CLASS[`${isLegalDestination}`]}`}
+      onPointerDown={(event) => onGrab(square, event)}
     >
-      {checker && (
-        <CheckerDisc
-          side={checker.side}
-          isMovable={canMove && isMovableBy(checker, PLAYER_SIDE)}
-          dragOffset={dragOffset}
-          onPointerDown={(event) => onGrab(square, event)}
-        />
-      )}
+      {checker && <CheckerDisc side={checker.side} dragOffset={dragOffset} />}
     </div>
   )
 }

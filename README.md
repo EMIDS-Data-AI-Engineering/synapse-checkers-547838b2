@@ -64,6 +64,21 @@ Checked live in headless Chromium (Playwright) against `npm run build` + `npm ru
 | 375x812 | yes | yes | yes | none | none | 375 / 375 |
 | 375x500 | yes | yes | yes | none | none | 375 / 375 |
 
+### Grab zone
+
+The whole square is the grab target, not just the round checker: the press handler lives on the board square, so a press anywhere in a movable dark checker's square, corners and edges included, starts the drag on the first attempt. Squares partition the board, so a zone never overlaps a neighbour. This is covered by the `hit zone` tests in `src/app/BoardDrag.test.tsx`.
+
+Checked live in headless Chromium (Playwright) against `npm run build` + `npm run preview`, with the real mouse. For each of the 12 dark checkers' squares, a press at 9 points inside the square (the four corners and four edge midpoints inset 10% from the edge, and the centre) started the drag on the first press, with no second attempt:
+
+| Viewport | First-press drags | Page scrollWidth / clientWidth |
+| --- | --- | --- |
+| 1440x900 | 108 / 108 (100%) | 1440 / 1440 |
+| 768x1024 | 108 / 108 (100%) | 768 / 768 |
+| 375x812 | 108 / 108 (100%) | 375 / 375 |
+| 375x500 | 108 / 108 (100%) | 375 / 375 |
+
+Non-overlap (AC3): presses within a pixel of a shared edge at 375px landed on the neighbouring square, as hit testing on adjacent squares should, so no zone reaches into another. This automated pass is the proxy for AC2's 95% figure; a human trial has not been run.
+
 Known gap, to be raised as a follow-up story: WCAG 2.2 SC 2.5.7 (Dragging Movements) asks for a single-pointer alternative, and keyboard users cannot move a piece. The mockup's click-a-piece-then-click-a-highlighted-square interaction, with legal-move highlighting, would close it. No criterion of this story requires it.
 
 ## Turn rule
