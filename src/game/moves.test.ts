@@ -96,7 +96,7 @@ describe('moves', () => {
 
   it('legalDestinationsFor returns no squares for a checker whose forward squares are occupied', async () => {
     const { legalDestinationsFor } = await loadMoves()
-    const checkers = [darkAt(5, 2), darkAt(4, 1), lightAt(4, 3)]
+    const checkers = [darkAt(5, 2), darkAt(4, 1), lightAt(4, 3), lightAt(3, 4), lightAt(3, 0)]
 
     expect(legalDestinationsFor(checkers, ORIGIN)).toEqual([])
   })
@@ -107,12 +107,12 @@ describe('moves', () => {
     expect(legalDestinationsFor([darkAt(5, 2)], { row: 3, column: 0 })).toEqual([])
   })
 
-  it('legalDestinationsFor agrees with isLegalStep for every square', async () => {
-    const { legalDestinationsFor, isLegalStep } = await loadMoves()
+  it('legalDestinationsFor agrees with isLegalMove for every square', async () => {
+    const { legalDestinationsFor, isLegalMove } = await loadMoves()
     const { boardSquares } = await import('./board')
     const checkers = [darkAt(5, 2), lightAt(4, 3)]
 
-    const expected = boardSquares().filter((square) => isLegalStep(checkers, ORIGIN, square))
+    const expected = boardSquares().filter((square) => isLegalMove(checkers, ORIGIN, square))
 
     expect(legalDestinationsFor(checkers, ORIGIN)).toEqual(expected.map(({ row, column }) => ({ row, column })))
   })
