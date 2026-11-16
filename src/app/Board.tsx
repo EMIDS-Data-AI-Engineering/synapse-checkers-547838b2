@@ -1,10 +1,12 @@
-import { useCallback, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react'
+import { useCallback, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent } from 'react'
 import { checkerAt, type Checker, type Side } from '../game/pieces'
 import { PLAYER_SIDE } from '../game/matchUp'
 import { isMovableBy } from '../game/moves'
 import { isPlayersTurn, playStep, startingMatch, type MatchState } from '../game/turn'
+import type { ClientPoint } from './pointToSquare'
 import { TurnIndicator } from './TurnIndicator'
 import { useCheckerDrag, type DragState } from './useCheckerDrag'
+import { SNAP_SETTLE_MS, useSnapSettle, type Settle } from './useSnapSettle'
 import { BOARD_SIZE, boardSquares, neighbourOf, type Direction, type Position, type Shade, type Square } from '../game/board'
 
 const SHADE_CLASS: Record<Shade, string> = {
@@ -34,28 +36,45 @@ const DIRECTION_BY_KEY: Record<string, Direction> = {
   ArrowRight: 'right',
 }
 
+const isSameSquare = (first: Position, second: Position) => first.row === second.row && first.column === second.column
+
 const FIRST_SQUARE: Position = { row: 0, column: 0 }
 
 interface CheckerDiscProps {
   side: Side
   isMovable: boolean
   dragOffset?: DragState['offset']
+  settleOffset?: Settle['offset']
   onPointerDown: (event: PointerEvent) => void
 }
 
-function discClasses(side: Side, isMovable: boolean, isDragging: boolean): string {
-  const cursor = isDragging ? 'cursor-grabbing pointer-events-none relative z-10 touch-none' : isMovable ? 'cursor-grab touch-none' : ''
-  return `h-4/5 w-4/5 rounded-full border-2 border-square-light ${CHECKER_CLASS[side]} ${cursor}`
+const SETTLE_CLASS = 'animate-snap-settle motion-reduce:animate-none'
+
+function styleOf(dragOffset?: DragState['offset'], settleOffset?: Settle['offset']): CSSProperties | undefined {
+  if (dragOffset) return { transform: `translate(${dragOffset.x}px, ${dragOffset.y}px)` }
+  if (!settleOffset) return undefined
+  return {
+    '--settle-x': `${settleOffset.x}px`,
+    '--settle-y': `${settleOffset.y}px`,
+    '--snap-settle-duration': `${SNAP_SETTLE_MS}ms`,
+  } as CSSProperties
 }
 
-function CheckerDisc({ side, isMovable, dragOffset, onPointerDown }: CheckerDiscProps) {
+function discClasses(side: Side, isMovable: boolean, isDragging: boolean, isSettling: boolean): string {
+  const cursor = isDragging ? 'cursor-grabbing pointer-events-none relative z-10 touch-none' : isMovable ? 'cursor-grab touch-none' : ''
+  const settling = isSettling ? SETTLE_CLASS : ''
+  return `h-4/5 w-4/5 rounded-full border-2 border-square-light ${CHECKER_CLASS[side]} ${cursor} ${settling}`
+}
+
+function CheckerDisc({ side, isMovable, dragOffset, settleOffset, onPointerDown }: CheckerDiscProps) {
   return (
     <span
       aria-hidden="true"
       data-checker={side}
       data-dragging={dragOffset ? 'true' : undefined}
-      style={dragOffset ? { transform: `translate(${dragOffset.x}px, ${dragOffset.y}px)` } : undefined}
-      className={discClasses(side, isMovable, Boolean(dragOffset))}
+      data-settling={settleOffset ? 'true' : undefined}
+      style={styleOf(dragOffset, settleOffset)}
+      className={discClasses(side, isMovable, Boolean(dragOffset), Boolean(settleOffset))}
       onPointerDown={onPointerDown}
     />
   )
@@ -67,10 +86,11 @@ interface BoardSquareProps {
   isFocusStop: boolean
   canMove: boolean
   dragOffset?: DragState['offset']
+  settleOffset?: Settle['offset']
   onGrab: (origin: Position, event: PointerEvent) => void
 }
 
-function BoardSquare({ square, checker, isFocusStop, canMove, dragOffset, onGrab }: BoardSquareProps) {
+function BoardSquare({ square, checker, isFocusStop, canMove, dragOffset, settleOffset, onGrab }: BoardSquareProps) {
   return (
     <div
       role="gridcell"
@@ -86,6 +106,7 @@ function BoardSquare({ square, checker, isFocusStop, canMove, dragOffset, onGrab
           side={checker.side}
           isMovable={canMove && isMovableBy(checker, PLAYER_SIDE)}
           dragOffset={dragOffset}
+          settleOffset={settleOffset}
           onPointerDown={(event) => onGrab(square, event)}
         />
       )}
@@ -103,9 +124,13 @@ export function Board({ canMove = false, initialMatch }: BoardProps) {
   const [match, setMatch] = useState(() => initialMatch ?? startingMatch())
   const { checkers } = match
   const getBoardRect = useCallback(() => gridRef.current?.getBoundingClientRect(), [])
+  const { settle, startSettle } = useSnapSettle()
   const applyMove = useCallback(
-    (from: Position, to: Position) => setMatch((current) => playStep(current, from, to)),
-    [],
+    (from: Position, to: Position, landing: ClientPoint) => {
+      setMatch((current) => playStep(current, from, to))
+      startSettle(to, landing)
+    },
+    [startSettle],
   )
   const { drag, startDrag } = useCheckerDrag({ checkers, canMove: canMove && isPlayersTurn(match), getBoardRect, onMove: applyMove })
   const [focusStop, setFocusStop] = useState<Position>(FIRST_SQUARE)
@@ -140,6 +165,7 @@ export function Board({ canMove = false, initialMatch }: BoardProps) {
               isFocusStop={square.row === focusStop.row && square.column === focusStop.column}
               canMove={canMove && isPlayersTurn(match)}
               dragOffset={drag?.origin.row === square.row && drag.origin.column === square.column ? drag.offset : undefined}
+              settleOffset={settle && isSameSquare(settle.square, square) ? settle.offset : undefined}
               onGrab={startDrag}
             />
           ))}

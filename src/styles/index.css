@@ -9,6 +9,13 @@
   --color-square-dark: #8b5a2b;
   --color-checker-dark: #000000;
   --color-checker-light: #e8dcc8;
+  --animate-snap-settle: snap-settle var(--snap-settle-duration) ease-out;
+
+  @keyframes snap-settle {
+    from {
+      transform: translate(var(--settle-x), var(--settle-y));
+    }
+  }
 }
 
 body {
