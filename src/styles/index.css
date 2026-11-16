@@ -1,7 +1,7 @@
 /* Keep these values equal to src/theme/colors.ts; cssTokens.test.ts enforces it. */
 @import "tailwindcss";
 
-@theme {
+@theme inline {
   --color-ink: #111827;
   --color-paper: #ffffff;
   --color-accent: #1d4ed8;
