@@ -3,7 +3,8 @@ import type { Position } from '../game/board'
 import { PLAYER_SIDE } from '../game/matchUp'
 import { isLegalStep, isMovableBy } from '../game/moves'
 import { checkerAt, type Checker } from '../game/pieces'
-import { pointToSquare, type ClientPoint } from './pointToSquare'
+import type { ClientPoint } from './pointToSquare'
+import { centreOf, landingOffset, snapTarget } from './snapToSquare'
 
 export interface DragState {
   origin: Position
@@ -15,11 +16,17 @@ interface DragOptions {
   checkers: Checker[]
   canMove: boolean
   getBoardRect: () => DOMRect | undefined
-  onMove: (from: Position, to: Position) => void
+  onMove: (from: Position, to: Position, landing: ClientPoint) => void
 }
 
 const NO_OFFSET: ClientPoint = { x: 0, y: 0 }
 const pointOf = (event: { clientX: number; clientY: number }): ClientPoint => ({ x: event.clientX, y: event.clientY })
+
+/** Where the dragged disc's centre was drawn: its origin centre moved by the pointer's travel since the grab. */
+function lastDrawnCentre(rect: DOMRect, origin: Position, grabPoint: ClientPoint, pointer: ClientPoint): ClientPoint {
+  const originCentre = centreOf(origin, rect)
+  return { x: originCentre.x + pointer.x - grabPoint.x, y: originCentre.y + pointer.y - grabPoint.y }
+}
 
 export function useCheckerDrag({ checkers, canMove, getBoardRect, onMove }: DragOptions) {
   const [drag, setDrag] = useState<DragState | undefined>()
@@ -44,9 +51,12 @@ export function useCheckerDrag({ checkers, canMove, getBoardRect, onMove }: Drag
     }
     const release = (event: PointerEvent) => {
       const rect = getBoardRect()
-      const target = rect && pointToSquare(pointOf(event), rect)
+      const pointer = pointOf(event)
+      const target = rect && snapTarget(pointer, rect)
       setDrag(undefined)
-      if (target && isLegalStep(checkers, origin, target)) onMove(origin, target)
+      if (rect && target && isLegalStep(checkers, origin, target)) {
+        onMove(origin, target, landingOffset(lastDrawnCentre(rect, origin, grabPoint, pointer), target, rect))
+      }
     }
     const cancel = () => setDrag(undefined)
     window.addEventListener('pointermove', follow)

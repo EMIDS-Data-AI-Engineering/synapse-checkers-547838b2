@@ -51,6 +51,12 @@ The overlay sits in the same grid cell as the board, so the populated board is r
 
 The fade's class names, its `transitionDuration` (taken from `REVEAL_DURATION_MS`) and the reduced-motion rule are asserted in `GameStartOverlay.fade.test.tsx`.
 
+## Snap
+
+A released checker snaps to the nearest dark square (distance to square centres, measured in cells). If that square is a legal step the move is accepted; if it is illegal, if two dark squares are equally near, or if the release is off the board, the checker returns to its origin. An accepted drop eases from the release point to the square centre in `SNAP_SETTLE_MS` (150 ms, under 200 ms); `prefers-reduced-motion` disables the animation.
+
+Live check (headless Chromium via Playwright, production build, checker released on the light square beside a legal destination): at 1440x900, 375x812 and 375x500 the move was accepted, the disc computed `animation-name: snap-settle` with `animation-duration: 0.15s`, and `data-settling` was cleared within 300 ms. With `prefers-reduced-motion: reduce` the computed animation was `none`, so `motion-reduce:animate-none` overrides the settle.
+
 ## Drag
 
 Dark checkers can be dragged with the pointer once the game is in the `playing` phase. A drop on an empty dark square one step diagonally forward snaps the checker there; any other drop, or a cancelled pointer, returns it to its origin. Jumps, kings and keyboard moves are not part of this story.
