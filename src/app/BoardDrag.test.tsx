@@ -214,3 +214,50 @@ describe('Board drag', () => {
     expect(await axe(container)).toHaveNoViolations()
   })
 })
+
+describe('Board turn', () => {
+  const PLAYERS_TURN = 'Your turn'
+  const COMPUTERS_TURN = 'Computer\'s turn'
+
+  function dragAndDrop(container: HTMLElement, from: [number, number], to: [number, number]) {
+    pressChecker(container, ...from)
+    moveTo(...to)
+    releaseAt(...to)
+  }
+
+  it('starts on the player\'s turn', () => {
+    const { container } = renderBoard()
+
+    expect(container).toHaveTextContent(PLAYERS_TURN)
+  })
+
+  it('passes the turn to the computer after a legal move', () => {
+    const { container } = renderBoard()
+
+    dragAndDrop(container, [5, 2], [4, 3])
+
+    expect(container).toHaveTextContent(COMPUTERS_TURN)
+  })
+
+  it('does not let the player pick up a checker once the turn has passed to the computer', () => {
+    const { container } = renderBoard()
+    dragAndDrop(container, [5, 2], [4, 3])
+
+    pressChecker(container, 5, 4)
+
+    expect(container.querySelector('[data-dragging]')).toBeNull()
+  })
+
+  it.each([
+    ['straight ahead', 4, 2],
+    ['sideways', 5, 3],
+    ['backward', 6, 1],
+  ])('keeps the player\'s turn after a checker is released %s', (_label, row, column) => {
+    const { container } = renderBoard()
+
+    dragAndDrop(container, [5, 2], [row, column])
+
+    expect(container).toHaveTextContent(PLAYERS_TURN)
+    expect(checkerIn(container, 5, 2)).toHaveAttribute('data-checker', 'dark')
+  })
+})
