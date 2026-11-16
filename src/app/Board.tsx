@@ -51,7 +51,7 @@ function discClasses(side: Side, isDragging: boolean): string {
   return `h-4/5 w-4/5 rounded-full border-2 border-square-light ${CHECKER_CLASS[side]} ${cursor}`
 }
 
-function CheckerDisc({ side, isMovable, dragOffset, onPointerDown }: CheckerDiscProps) {
+function CheckerDisc({ side, dragOffset }: CheckerDiscProps) {
   return (
     <span
       aria-hidden="true"
