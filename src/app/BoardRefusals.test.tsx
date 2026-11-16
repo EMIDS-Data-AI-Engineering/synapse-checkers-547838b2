@@ -1,5 +1,6 @@
 import { fireEvent, render } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
+import type { MatchState } from '../game/turn'
 import { Board } from './Board'
 
 const CELL = 100
@@ -28,6 +29,17 @@ describe('Board refusals onto empty dark squares', () => {
 
     expect(cellAt(container, row, column).querySelector('[data-checker]')).toBeNull()
     expect(cellAt(container, 5, 2).querySelector('[data-checker]')).toHaveAttribute('data-checker', 'dark')
+    expect(container).toHaveTextContent('Your turn')
+  })
+
+  it('returns the checker to its origin and keeps the turn when released backward onto an empty dark square', () => {
+    const lonePlayerChecker: MatchState = { checkers: [{ row: 4, column: 3, side: 'dark' }], sideToMove: 'dark' }
+    const { container } = render(<Board canMove initialMatch={lonePlayerChecker} />)
+
+    dragAndDrop(container, [4, 3], [5, 2])
+
+    expect(cellAt(container, 5, 2).querySelector('[data-checker]')).toBeNull()
+    expect(cellAt(container, 4, 3).querySelector('[data-checker]')).toHaveAttribute('data-checker', 'dark')
     expect(container).toHaveTextContent('Your turn')
   })
 })

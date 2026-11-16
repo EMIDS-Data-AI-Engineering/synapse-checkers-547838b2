@@ -2,7 +2,7 @@ import { useCallback, useRef, useState, type KeyboardEvent, type PointerEvent } 
 import { checkerAt, type Checker, type Side } from '../game/pieces'
 import { PLAYER_SIDE } from '../game/matchUp'
 import { isMovableBy } from '../game/moves'
-import { isPlayersTurn, playStep, startingMatch } from '../game/turn'
+import { isPlayersTurn, playStep, startingMatch, type MatchState } from '../game/turn'
 import { TurnIndicator } from './TurnIndicator'
 import { useCheckerDrag, type DragState } from './useCheckerDrag'
 import { BOARD_SIZE, boardSquares, neighbourOf, type Direction, type Position, type Shade, type Square } from '../game/board'
@@ -93,9 +93,14 @@ function BoardSquare({ square, checker, isFocusStop, canMove, dragOffset, onGrab
   )
 }
 
-export function Board({ canMove = false }: { canMove?: boolean }) {
+interface BoardProps {
+  canMove?: boolean
+  initialMatch?: MatchState
+}
+
+export function Board({ canMove = false, initialMatch }: BoardProps) {
   const gridRef = useRef<HTMLDivElement>(null)
-  const [match, setMatch] = useState(startingMatch)
+  const [match, setMatch] = useState(() => initialMatch ?? startingMatch())
   const { checkers } = match
   const getBoardRect = useCallback(() => gridRef.current?.getBoundingClientRect(), [])
   const applyMove = useCallback(
