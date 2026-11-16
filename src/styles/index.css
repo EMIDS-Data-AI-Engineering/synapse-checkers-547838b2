@@ -1,7 +1,7 @@
 /* Keep these values equal to src/theme/colors.ts; cssTokens.test.ts enforces it. */
 @import "tailwindcss";
 
-@theme inline {
+@theme {
   --color-ink: #111827;
   --color-paper: #ffffff;
   --color-accent: #1d4ed8;
@@ -9,6 +9,10 @@
   --color-square-dark: #8b5a2b;
   --color-checker-dark: #000000;
   --color-checker-light: #e8dcc8;
+}
+
+/* inline: the duration variable is set on the settling disc, so it must resolve there, not on :root. */
+@theme inline {
   --animate-snap-settle: snap-settle var(--snap-settle-duration) ease-out;
 
   @keyframes snap-settle {
