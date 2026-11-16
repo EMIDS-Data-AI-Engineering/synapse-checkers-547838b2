@@ -55,4 +55,13 @@ The fade's class names, its `transitionDuration` (taken from `REVEAL_DURATION_MS
 
 Dark checkers can be dragged with the pointer once the game is in the `playing` phase. A drop on an empty dark square one step diagonally forward snaps the checker there; any other drop, or a cancelled pointer, returns it to its origin. Jumps, kings and keyboard moves are not part of this story.
 
-Live headless-Chromium verification at 1440x900, 768x1024, 375x812 and 375x500 has **not** been run for this change; the behaviour is covered by the happy-dom tests only (`src/app/BoardDrag.test.tsx`).
+Checked live in headless Chromium (Playwright) against `npm run build` + `npm run preview`, driving the real mouse. At every viewport the pressed checker followed the cursor exactly (its centre moved by the pointer delta), carried `data-dragging` and `touch-action: none`, and a drop on a legal forward diagonal square snapped it there with no transform or marker left. A drop on a light square returned it to its origin with no `data-dragging`, `role=alert` or `aria-invalid` on the board. The page never scrolled sideways.
+
+| Viewport | Follows cursor | Legal drop snaps | Illegal drop returns | Error state left | touch-action while dragging | scrollWidth / clientWidth |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1440x900 | yes | yes | yes | none | none | 1440 / 1440 |
+| 768x1024 | yes | yes | yes | none | none | 768 / 768 |
+| 375x812 | yes | yes | yes | none | none | 375 / 375 |
+| 375x500 | yes | yes | yes | none | none | 375 / 375 |
+
+Known gap, to be raised as a follow-up story: WCAG 2.2 SC 2.5.7 (Dragging Movements) asks for a single-pointer alternative, and keyboard users cannot move a piece. The mockup's click-a-piece-then-click-a-highlighted-square interaction, with legal-move highlighting, would close it. No criterion of this story requires it.

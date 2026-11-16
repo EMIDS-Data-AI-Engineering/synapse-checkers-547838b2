@@ -41,7 +41,7 @@ interface CheckerDiscProps {
 }
 
 function discClasses(side: Side, isMovable: boolean, isDragging: boolean): string {
-  const cursor = isDragging ? 'cursor-grabbing pointer-events-none relative z-10' : isMovable ? 'cursor-grab touch-none' : ''
+  const cursor = isDragging ? 'cursor-grabbing pointer-events-none relative z-10 touch-none' : isMovable ? 'cursor-grab touch-none' : ''
   return `h-4/5 w-4/5 rounded-full border-2 border-square-light ${CHECKER_CLASS[side]} ${cursor}`
 }
 
