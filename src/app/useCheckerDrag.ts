@@ -51,10 +51,12 @@ export function useCheckerDrag({ checkers, canMove, getBoardRect, onMove }: Drag
     }
     const release = (event: PointerEvent) => {
       const rect = getBoardRect()
-      const releasePoint = rect && lastDrawnCentre(rect, origin, grabPoint, pointOf(event))
-      const target = rect && releasePoint && snapTarget(releasePoint, rect)
+      const pointer = pointOf(event)
+      const target = rect && snapTarget(pointer, rect)
       setDrag(undefined)
-      if (rect && releasePoint && target && isLegalStep(checkers, origin, target)) onMove(origin, target, landingOffset(releasePoint, target, rect))
+      if (rect && target && isLegalStep(checkers, origin, target)) {
+        onMove(origin, target, landingOffset(lastDrawnCentre(rect, origin, grabPoint, pointer), target, rect))
+      }
     }
     const cancel = () => setDrag(undefined)
     window.addEventListener('pointermove', follow)

@@ -213,6 +213,163 @@ describe('Board drag', () => {
 
     expect(await axe(container)).toHaveNoViolations()
   })
+
+  describe('hit zone', () => {
+    const CORNER_INSET = 2
+    const EDGE_MIDPOINT = CELL / 2
+    const FAR_CORNER = CELL - CORNER_INSET
+    const SAMPLED_POINTS = [
+      { x: CORNER_INSET, y: CORNER_INSET },
+      { x: FAR_CORNER, y: CORNER_INSET },
+      { x: CORNER_INSET, y: FAR_CORNER },
+      { x: FAR_CORNER, y: FAR_CORNER },
+      { x: EDGE_MIDPOINT, y: CORNER_INSET },
+      { x: EDGE_MIDPOINT, y: FAR_CORNER },
+      { x: CORNER_INSET, y: EDGE_MIDPOINT },
+      { x: FAR_CORNER, y: EDGE_MIDPOINT },
+      { x: EDGE_MIDPOINT, y: EDGE_MIDPOINT },
+    ]
+    const TOP_LEFT = SAMPLED_POINTS[0]
+    const BOTTOM_RIGHT = SAMPLED_POINTS[3]
+    const TOP_EDGE = SAMPLED_POINTS[4]
+    const PLAYER_CHECKER = { row: 5, column: 2 }
+    const LIGHT_CHECKER = { row: 2, column: 1 }
+    const EMPTY_SQUARE = { row: 4, column: 3 }
+
+    type Point = { x: number; y: number }
+
+    function pressSquareAt(container: HTMLElement, row: number, column: number, point: Point) {
+      fireEvent.pointerDown(cellAt(container, row, column), {
+        clientX: column * CELL + point.x,
+        clientY: row * CELL + point.y,
+        button: 0,
+        isPrimary: true,
+      })
+    }
+    const isDragging = (container: HTMLElement, row: number, column: number) =>
+      checkerIn(container, row, column)?.getAttribute('data-dragging') === 'true'
+    function expectCornerGrabWorks(container: HTMLElement) {
+      pressSquareAt(container, PLAYER_CHECKER.row, PLAYER_CHECKER.column, TOP_LEFT)
+      expect(isDragging(container, PLAYER_CHECKER.row, PLAYER_CHECKER.column)).toBe(true)
+      cancelPointer()
+    }
+    function darkCheckerPositions(container: HTMLElement) {
+      return Array.from(container.querySelectorAll('[data-checker="dark"]'), (disc) => {
+        const cell = disc.closest('[role="gridcell"]')!
+        return { row: Number(cell.getAttribute('data-row')), column: Number(cell.getAttribute('data-column')) }
+      })
+    }
+
+    it('starts dragging the checker when its square is pressed at the top-left corner', () => {
+      const { container } = renderBoard()
+
+      pressSquareAt(container, PLAYER_CHECKER.row, PLAYER_CHECKER.column, TOP_LEFT)
+
+      expect(isDragging(container, PLAYER_CHECKER.row, PLAYER_CHECKER.column)).toBe(true)
+    })
+
+    it('starts dragging the checker when its square is pressed at the bottom-right corner', () => {
+      const { container } = renderBoard()
+
+      pressSquareAt(container, PLAYER_CHECKER.row, PLAYER_CHECKER.column, BOTTOM_RIGHT)
+
+      expect(isDragging(container, PLAYER_CHECKER.row, PLAYER_CHECKER.column)).toBe(true)
+    })
+
+    it('starts dragging the checker when its square is pressed outside the disc on an edge', () => {
+      const { container } = renderBoard()
+
+      pressSquareAt(container, PLAYER_CHECKER.row, PLAYER_CHECKER.column, TOP_EDGE)
+
+      expect(isDragging(container, PLAYER_CHECKER.row, PLAYER_CHECKER.column)).toBe(true)
+    })
+
+    it('drops a checker grabbed by its square\'s corner onto a legal square', () => {
+      const { container } = renderBoard()
+      pressSquareAt(container, PLAYER_CHECKER.row, PLAYER_CHECKER.column, TOP_LEFT)
+      moveTo(4, 3)
+
+      releaseAt(4, 3)
+
+      expect(checkerIn(container, 4, 3)).toHaveAttribute('data-checker', 'dark')
+      expect(checkerIn(container, PLAYER_CHECKER.row, PLAYER_CHECKER.column)).toBeNull()
+    })
+
+    it('starts the drag on the first press at every sampled point of a movable square', () => {
+      SAMPLED_POINTS.forEach((point) => {
+        const { container, unmount } = renderBoard()
+
+        pressSquareAt(container, PLAYER_CHECKER.row, PLAYER_CHECKER.column, point)
+
+        expect(isDragging(container, PLAYER_CHECKER.row, PLAYER_CHECKER.column)).toBe(true)
+        unmount()
+      })
+    })
+
+    it('starts the drag on the first press from the square for every movable dark checker', () => {
+      const { container } = renderBoard()
+      const positions = darkCheckerPositions(container)
+      expect(positions.length).toBeGreaterThan(0)
+
+      positions.forEach(({ row, column }) => {
+        pressSquareAt(container, row, column, BOTTOM_RIGHT)
+        expect(isDragging(container, row, column)).toBe(true)
+        cancelPointer()
+      })
+    })
+
+    it('does not start a drag from a corner press on a light checker\'s square', () => {
+      const { container } = renderBoard()
+      expectCornerGrabWorks(renderBoard().container)
+
+      pressSquareAt(container, LIGHT_CHECKER.row, LIGHT_CHECKER.column, TOP_LEFT)
+
+      expect(container.querySelector('[data-dragging]')).toBeNull()
+    })
+
+    it('does not start a drag from a press on an empty square', () => {
+      const { container } = renderBoard()
+      expectCornerGrabWorks(renderBoard().container)
+
+      pressSquareAt(container, EMPTY_SQUARE.row, EMPTY_SQUARE.column, TOP_LEFT)
+
+      expect(container.querySelector('[data-dragging]')).toBeNull()
+    })
+
+    it('does not start a drag from a square press while the board cannot move', () => {
+      const { container } = renderBoard(false)
+      expectCornerGrabWorks(renderBoard().container)
+
+      pressSquareAt(container, PLAYER_CHECKER.row, PLAYER_CHECKER.column, TOP_LEFT)
+
+      expect(container.querySelector('[data-dragging]')).toBeNull()
+    })
+
+    it('a corner press grabs only the checker in that square and not its diagonal neighbour', () => {
+      const { container } = renderBoard()
+      const diagonalNeighbour = { row: PLAYER_CHECKER.row + 1, column: PLAYER_CHECKER.column + 1 }
+
+      pressSquareAt(container, PLAYER_CHECKER.row, PLAYER_CHECKER.column, BOTTOM_RIGHT)
+
+      expect(isDragging(container, PLAYER_CHECKER.row, PLAYER_CHECKER.column)).toBe(true)
+      expect(isDragging(container, diagonalNeighbour.row, diagonalNeighbour.column)).toBe(false)
+      expect(container.querySelectorAll('[data-dragging]')).toHaveLength(1)
+    })
+
+    it('adjacent squares each grab their own checker when pressed at their shared corner', () => {
+      const { container } = renderBoard()
+      const neighbour = { row: 6, column: 1 }
+
+      pressSquareAt(container, PLAYER_CHECKER.row, PLAYER_CHECKER.column, { x: CORNER_INSET, y: FAR_CORNER })
+      expect(isDragging(container, PLAYER_CHECKER.row, PLAYER_CHECKER.column)).toBe(true)
+      expect(isDragging(container, neighbour.row, neighbour.column)).toBe(false)
+      cancelPointer()
+
+      pressSquareAt(container, neighbour.row, neighbour.column, { x: FAR_CORNER, y: CORNER_INSET })
+      expect(isDragging(container, neighbour.row, neighbour.column)).toBe(true)
+      expect(isDragging(container, PLAYER_CHECKER.row, PLAYER_CHECKER.column)).toBe(false)
+    })
+  })
 })
 
 describe('Board turn', () => {
