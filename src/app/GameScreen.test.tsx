@@ -135,4 +135,28 @@ describe('GameScreen', () => {
 
     expect(await axe(container)).toHaveNoViolations()
   })
+  it('lets the player drag a checker only after the game starts', async () => {
+    const { container } = await renderGameScreen()
+    const grid = board(container) as HTMLElement
+    grid.getBoundingClientRect = () => ({ left: 0, top: 0, width: 800, height: 800 }) as DOMRect
+    const cell = (row: number, column: number) =>
+      container.querySelector(`[role="gridcell"][data-row="${row}"][data-column="${column}"]`) as HTMLElement
+    const dragFrom52To43 = () => {
+      fireEvent.pointerDown(cell(5, 2).querySelector('[data-checker]')!, { clientX: 250, clientY: 550, button: 0 })
+      fireEvent.pointerMove(window, { clientX: 350, clientY: 450 })
+      fireEvent.pointerUp(window, { clientX: 350, clientY: 450 })
+    }
+
+    dragFrom52To43()
+    expect(cell(5, 2).querySelector('[data-checker="dark"]')).not.toBeNull()
+    expect(cell(4, 3).querySelector('[data-checker]')).toBeNull()
+
+    clickStart()
+    await finishReveal()
+    dragFrom52To43()
+
+    expect(cell(5, 2).querySelector('[data-checker]')).toBeNull()
+    expect(cell(4, 3).querySelector('[data-checker="dark"]')).not.toBeNull()
+  })
+
 })
