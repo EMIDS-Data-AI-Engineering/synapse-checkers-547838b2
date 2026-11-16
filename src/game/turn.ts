@@ -1,15 +1,13 @@
 import type { Position } from './board'
 import { FIRST_TO_MOVE, PLAYER_SIDE } from './matchUp'
 import { isMovableBy, moveChecker } from './moves'
-import { checkerAt, startingCheckers, type Checker, type Side } from './pieces'
+import { checkerAt, opponentOf, startingCheckers, type Checker, type Side } from './pieces'
+
+export { opponentOf }
 
 export interface MatchState {
   checkers: Checker[]
   sideToMove: Side
-}
-
-export function opponentOf(side: Side): Side {
-  return side === 'dark' ? 'light' : 'dark'
 }
 
 export function startingMatch(): MatchState {

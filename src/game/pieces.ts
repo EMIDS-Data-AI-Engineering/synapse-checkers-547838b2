@@ -2,6 +2,10 @@ import { BOARD_SIZE, boardSquares, type Position } from './board'
 
 export type Side = 'dark' | 'light'
 
+export function opponentOf(side: Side): Side {
+  return side === 'dark' ? 'light' : 'dark'
+}
+
 export interface Checker extends Position {
   side: Side
 }
