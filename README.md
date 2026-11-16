@@ -69,3 +69,18 @@ Known gap, to be raised as a follow-up story: WCAG 2.2 SC 2.5.7 (Dragging Moveme
 ## Turn rule
 
 Regular checkers move one step diagonally forward onto an empty dark square; any other drop returns the checker to its origin and keeps the turn. A legal move passes the turn to the computer (`src/game/turn.ts`). Kings do not exist yet, so every piece is treated as a regular piece. No computer opponent exists yet, so the turn stays with the computer after the player's move.
+
+### Turn bar layout and contrast
+
+The turn bar uses `text-ink` (#111827) on `bg-paper` (#ffffff), a contrast ratio of about 17:1, above the 4.5:1 minimum for normal text.
+
+Checked live in headless Chromium (Playwright) against `npm run build` + `npm run preview`, after pressing Start Game:
+
+| Viewport | Bar top / bottom (px) | scrollWidth / clientWidth | Document height |
+| --- | --- | --- | --- |
+| 1440x900 | 678 / 718 | 1440 / 1440 | 900 |
+| 768x1024 | 678 / 718 | 768 / 768 | 1024 |
+| 375x812 | 441 / 481 | 375 / 375 | 812 |
+| 375x500 | 441 / 481 | 375 / 375 | 505 |
+
+At 375x500 the document is 5 px taller than the viewport, so it scrolls vertically and the bar is reachable; nothing is clipped.
