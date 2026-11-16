@@ -23,3 +23,10 @@ describe('stylesheet colour tokens', () => {
     expect(declaredToken(name)).toBe(expected)
   })
 })
+
+describe('stylesheet snap settle animation', () => {
+  it('declares the snap-settle keyframes and an animation token driven by the settle duration', () => {
+    expect(stylesheet).toMatch(/@keyframes\s+snap-settle/)
+    expect(stylesheet).toMatch(/--animate-snap-settle:[^;]*snap-settle[^;]*var\(--snap-settle-duration\)/)
+  })
+})

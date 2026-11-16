@@ -142,7 +142,7 @@ describe('Board drag', () => {
   })
 
   it.each([
-    ['a light square', 4, 2],
+    ['a light square', 2, 2],
     ['an occupied square', 6, 3],
     ['a square two rows away', 3, 3],
     ['a backward square', 6, 1],
@@ -184,9 +184,9 @@ describe('Board drag', () => {
   it('leaves no error state, dragging marker or offset after an invalid drop', () => {
     const { container } = renderBoard()
     pickUp(container, 5, 2)
-    moveTo(4, 2)
+    moveTo(2, 2)
 
-    releaseAt(4, 2)
+    releaseAt(2, 2)
 
     expect(container.querySelector('[data-dragging]')).toBeNull()
     expect(container.querySelector('[style*="transform"]')).toBeNull()
@@ -249,7 +249,7 @@ describe('Board turn', () => {
   })
 
   it.each([
-    ['straight ahead', 4, 2],
+    ['two rows straight ahead', 3, 2],
     ['sideways', 5, 3],
     ['backward', 6, 1],
   ])('keeps the player\'s turn after a checker is released %s', (_label, row, column) => {
