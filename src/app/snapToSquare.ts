@@ -9,7 +9,7 @@ function cellSize(boardRect: DOMRect): ClientPoint {
   return { x: boardRect.width / BOARD_SIZE, y: boardRect.height / BOARD_SIZE }
 }
 
-function centreOf(square: Position, boardRect: DOMRect): ClientPoint {
+export function centreOf(square: Position, boardRect: DOMRect): ClientPoint {
   const cell = cellSize(boardRect)
   return {
     x: boardRect.left + (square.column + 0.5) * cell.x,
