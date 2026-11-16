@@ -114,3 +114,7 @@ Checked live in headless Chromium (Playwright) against `npm run build` + `npm ru
 | 375x500 | 2 | 42 | 4px inset `rgb(126, 207, 142)` | 0 |
 
 A screenshot at 375x500 shows the ring clearly visible and distinct on the 42 px dark squares.
+
+## Single-jump capture and piece count
+
+A plain checker may jump forward diagonally over an adjacent opponent onto the empty dark square beyond; the captured checker is removed immediately and the turn passes to the computer. Capture is not yet mandatory, and multi-jump and kings are out of scope. `PieceCount` shows each side's live count (derived from the board) above the grid. The browser layout check at 1440px, the breakpoint, 375px and 375x500 has not been run in this environment.
