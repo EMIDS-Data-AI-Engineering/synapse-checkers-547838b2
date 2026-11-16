@@ -1,6 +1,9 @@
 import { useCallback, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react'
-import { checkerAt, startingCheckers, type Checker, type Side } from '../game/pieces'
-import { FIRST_TO_MOVE, isMovableBy, moveChecker } from '../game/moves'
+import { checkerAt, type Checker, type Side } from '../game/pieces'
+import { PLAYER_SIDE } from '../game/matchUp'
+import { isMovableBy } from '../game/moves'
+import { isPlayersTurn, playStep, startingMatch } from '../game/turn'
+import { TurnIndicator } from './TurnIndicator'
 import { useCheckerDrag, type DragState } from './useCheckerDrag'
 import { BOARD_SIZE, boardSquares, neighbourOf, type Direction, type Position, type Shade, type Square } from '../game/board'
 
@@ -81,7 +84,7 @@ function BoardSquare({ square, checker, isFocusStop, canMove, dragOffset, onGrab
       {checker && (
         <CheckerDisc
           side={checker.side}
-          isMovable={canMove && isMovableBy(checker, FIRST_TO_MOVE)}
+          isMovable={canMove && isMovableBy(checker, PLAYER_SIDE)}
           dragOffset={dragOffset}
           onPointerDown={(event) => onGrab(square, event)}
         />
@@ -92,13 +95,14 @@ function BoardSquare({ square, checker, isFocusStop, canMove, dragOffset, onGrab
 
 export function Board({ canMove = false }: { canMove?: boolean }) {
   const gridRef = useRef<HTMLDivElement>(null)
-  const [checkers, setCheckers] = useState(startingCheckers)
+  const [match, setMatch] = useState(startingMatch)
+  const { checkers } = match
   const getBoardRect = useCallback(() => gridRef.current?.getBoundingClientRect(), [])
   const applyMove = useCallback(
-    (from: Position, to: Position) => setCheckers((current) => moveChecker(current, from, to)),
+    (from: Position, to: Position) => setMatch((current) => playStep(current, from, to)),
     [],
   )
-  const { drag, startDrag } = useCheckerDrag({ checkers, canMove, getBoardRect, onMove: applyMove })
+  const { drag, startDrag } = useCheckerDrag({ checkers, canMove: canMove && isPlayersTurn(match), getBoardRect, onMove: applyMove })
   const [focusStop, setFocusStop] = useState<Position>(FIRST_SQUARE)
 
   function moveFocus(event: KeyboardEvent) {
@@ -113,6 +117,7 @@ export function Board({ canMove = false }: { canMove?: boolean }) {
   }
 
   return (
+    <>
     <div
       ref={gridRef}
       onKeyDown={moveFocus}
@@ -128,7 +133,7 @@ export function Board({ canMove = false }: { canMove?: boolean }) {
               square={square}
               checker={checkerAt(checkers, square)}
               isFocusStop={square.row === focusStop.row && square.column === focusStop.column}
-              canMove={canMove}
+              canMove={canMove && isPlayersTurn(match)}
               dragOffset={drag?.origin.row === square.row && drag.origin.column === square.column ? drag.offset : undefined}
               onGrab={startDrag}
             />
@@ -136,6 +141,8 @@ export function Board({ canMove = false }: { canMove?: boolean }) {
         </div>
       ))}
     </div>
+    <TurnIndicator sideToMove={match.sideToMove} />
+    </>
   )
 }
 

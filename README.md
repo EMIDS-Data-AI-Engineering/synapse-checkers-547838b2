@@ -65,3 +65,7 @@ Checked live in headless Chromium (Playwright) against `npm run build` + `npm ru
 | 375x500 | yes | yes | yes | none | none | 375 / 375 |
 
 Known gap, to be raised as a follow-up story: WCAG 2.2 SC 2.5.7 (Dragging Movements) asks for a single-pointer alternative, and keyboard users cannot move a piece. The mockup's click-a-piece-then-click-a-highlighted-square interaction, with legal-move highlighting, would close it. No criterion of this story requires it.
+
+## Turn rule
+
+Regular checkers move one step diagonally forward onto an empty dark square; any other drop returns the checker to its origin and keeps the turn. A legal move passes the turn to the computer (`src/game/turn.ts`). Kings do not exist yet, so every piece is treated as a regular piece. No computer opponent exists yet, so the turn stays with the computer after the player's move.
